@@ -1,8 +1,9 @@
 - name:
-  hosts: server
+  hosts: server1
   tasks:
     - name: Create 100 users
       user:
 		name: "user{{ item }}"
 		password: "{{ 'P@ssw0rd' | password_hash('sha512') }}"
       loop: "{{ range (1,101) }}"
+
