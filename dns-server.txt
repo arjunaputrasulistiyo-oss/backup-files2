@@ -1,0 +1,53 @@
+---
+- name: Configure DNS Server
+  hosts: server1
+  tasks:
+    - name: Install Bind9
+      apt:
+        name: bind9
+        state: present
+
+    - name: Config Named
+      ansible.builtin.template:
+        src: /home/user/workfolder/named.conf.local
+        dest: /etc/bind/named.conf.local
+
+    - name: Copy File forward
+      ansible.builtin.command: cp /etc/bind/db.local /etc/bind/db.forward
+
+    - name: Replace localhost forward
+      ansible.builtin.replace:
+        path: /etc/bind/db.forward
+        regexp: 'localhost'
+        replace: 'rajapecel.net'
+
+    - name: Replace 127 forward
+      ansible.builtin.replace:
+        path: /etc/bind/db.forward
+        regexp: '127.0.0.1'
+        replace: '{{ ansible_host }}'
+
+    - name: Copy File reverse
+      ansible.builtin.command: cp /etc/bind/db.127 /etc/bind/db.reverse
+
+    - name: Replace localhost reverse
+      ansible.builtin.replace:
+        path: /etc/bind/db.reverse
+        regexp: 'localhost'
+        replace: 'rajapecel.net'
+
+    - name: Replace 1.0.0 reverse
+      ansible.builtin.replace:
+        path: /etc/bind/db.reverse
+        regexp: '1.0.0'
+        replace: '1'
+
+    - name: Replace resolv.conf
+      ansible.builtin.template:
+        src: /etc/resolv.conf
+        dest: /etc/resolv.conf
+
+    - name: Restart Bind9
+      service:
+        name: bind9
+        state: restarted
